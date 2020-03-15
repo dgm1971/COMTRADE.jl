@@ -1,22 +1,22 @@
 """
     ComtradeCfg
-    
+
 `ComtradeCfg` holds information from a COMTRADE "cfg" configuration file. Fields
 include:
 
-* `station_name::UTF8String` -- Identifier for the substation name. 
-* `rec_dev_id::UTF8String` -- Identifier for the recording device. 
-* `rev_year::Int` -- File format revision, normally 1991, 1999, or 2013. 
-* `tt::Int` -- Total number of channels. 
+* `station_name::String` -- Identifier for the substation name.
+* `rec_dev_id::String` -- Identifier for the recording device.
+* `rev_year::Int` -- File format revision, normally 1991, 1999, or 2013.
+* `tt::Int` -- Total number of channels.
 * `nA::Int` -- Number of analog channels.
 * `nD::Int` -- Number of digital channels.
 * `A::DataFrame` -- Table of analog channel information, one row per channel.
 * `D::DataFrame` -- Table of digital channel information, one row per channel.
-* `lf::Float64` -- Nominal line frequency in hertz. 
+* `lf::Float64` -- Nominal line frequency in hertz.
 * `nrates::Int` -- Number of sample rates.
-* `samp::Vector{Float64}` -- Sample rate in hertz. 
+* `samp::Vector{Float64}` -- Sample rate in hertz.
 * `endsamp::Vector{Int}` -- Numper of sample points at each sampling rate.
-* `npts::Int` -- Number of sample points. 
+* `npts::Int` -- Number of sample points.
 * `time` -- Time stamp of the first data point.
 * `triggertime` -- Time stamp of the trigger time.
 * `ft::ASCIIString` -- File type, options include "ASCII" or "BINARY".
@@ -29,25 +29,25 @@ include:
 `A` includes the following columns:
 
 * `:An::Int` -- Analog channel index.
-* `:ch_id::UTF8String` -- Channel identifier.
-* `:ph::UTF8String` -- Channel phase identifier. 
-* `:ccbm::UTF8String` -- Circuit component. 
-* `:uu::UTF8String` -- Units. 
+* `:ch_id::String` -- Channel identifier.
+* `:ph::String` -- Channel phase identifier.
+* `:ccbm::String` -- Circuit component.
+* `:uu::String` -- Units.
 * `:a::Float64` -- Channel multiplier.
-* `:b::Float64` -- Channel offset adder. 
-* `:skew::Float64` -- Time skew in microseconds from the start of the sample period. 
-* `:min::Float64` -- Minimum data value. 
-* `:max::Float64` -- Maximum data value. 
+* `:b::Float64` -- Channel offset adder.
+* `:skew::Float64` -- Time skew in microseconds from the start of the sample period.
+* `:min::Float64` -- Minimum data value.
+* `:max::Float64` -- Maximum data value.
 * `:primary::Float64` -- Voltage or current transformer ratio primary factor.
-* `:secondary::Float64` -- Voltage or current transformer ratio secondary factor. 
-* `:PS::UTF8String` -- "P" means `ax+b` is a primary value; "S" means a secondary value.
+* `:secondary::Float64` -- Voltage or current transformer ratio secondary factor.
+* `:PS::String` -- "P" means `ax+b` is a primary value; "S" means a secondary value.
 
 `D` includes the following columns:
 
 * `:Dn::Int` -- Digital channel index.
-* `:ch_id::UTF8String` -- Channel identifier.
-* `:ph::UTF8String` -- Channel phase identifier. 
-* `:ccbm::UTF8String` -- Circuit component. 
+* `:ch_id::String` -- Channel identifier.
+* `:ph::String` -- Channel phase identifier.
+* `:ccbm::String` -- Circuit component.
 * `:y::Int` -- Normal state, 0 or 1.
 
 Note that the `:PS` column of `A` is not used to adjust the data in `read_comtrade`.
@@ -55,9 +55,12 @@ Likewise, `:skew` is not used to adjust the time stamp.
 
 Some of the columns in `A` and `D` may be missing in older file revisions.
 """
-type ComtradeCfg
-    station_name::UTF8String
-    rec_dev_id::UTF8String
+
+using CSV
+
+mutable struct ComtradeCfg
+    station_name::String
+    rec_dev_id::String
     rev_year::Int
     tt::Int
     nA::Int
@@ -71,46 +74,49 @@ type ComtradeCfg
     npts::Int
     time
     triggertime
-    ft::ASCIIString
+    ft::String
     timemult::Float64
-    time_code::ASCIIString
-    local_code::ASCIIString
-    tmq_code::ASCIIString
+    time_code::String
+    local_code::String
+    tmq_code::String
     leapsec::Int
 end
 
-ComtradeCfg() = ComtradeCfg("", "", 1991, 0, 0, 0, 
-                            DataFrame(), 
-                            DataFrame(Any[Int[] for i in 1:4], [:Dn, :ch_id, :ph, :ccbm]), 
-                            0.0, 1, [0.0], [0], 0, 
-                            DateTimeMicro(), DateTimeMicro(), "", 1.0,
+ComtradeCfg() = ComtradeCfg("", "", 1991, 0, 0, 0,
+                            DataFrame(),
+                            DataFrame(Any[Int[] for i in 1:4], [:Dn, :ch_id, :ph, :ccbm]),
+                            0.0, 1, [0.0], [0], 0,
+                            0, 0, "", 1.0,
                             "", "", "", 0)
-asint(x) = parse(Int, x)                            
-asfloat(x) = parse(Float64, x)                            
+asint(x) = parse(Int, x)
+asfloat(x) = parse(Float64, x)
 
 function read_cfg(fn)
     x = ComtradeCfg()
     a = readlines(fn)
     sa = split(a[1], ',')
-    x.station_name = sa[1]    
-    x.rec_dev_id = sa[2]
+    x.station_name = sa[1]
+    if length(sa) > 1
+        x.rec_dev_id = sa[2]
+    end
+
     if length(sa) > 2
         x.rev_year = asint(sa[3])
     end
     sa = split(a[2], ',')
     x.tt = asint(sa[1])
-    x.nA = asint(replace(sa[2], "A", ""))
-    x.nD = asint(replace(sa[3], "D", ""))
-    x.A = readtable(fn, separator = ',', header = false, skipstart = 2, 
-                    nrows = x.nA)
-    names!(x.A, [:An, :ch_id, :ph, :ccbm, :uu, :a, :b, :skew, :min, :max, :primary, :secondary, :PS][1:ncol(x.A)])
+    x.nA = asint(replace(sa[2], "A"=> ""))
+    x.nD = asint(replace(sa[3], "D"=>""))
+    x.A = CSV.read(fn, delim = ',', header = false, skipto = 3,
+                    limit = x.nA)
+    rename!(x.A, [:An, :ch_id, :ph, :ccbm, :uu, :a, :b, :skew, :min, :max, :primary, :secondary, :PS][1:ncol(x.A)])
     if x.nD > 0
-        x.D = readtable(fn, separator = ',', header = false, skipstart = 2 + x.nA, 
-                        nrows = x.nD)
+        x.D = CSV.read(fn, delim = ',', header = false, skipto = 3 + x.nA,
+                        limit = x.nD)
         if x.rev_year > 1991
-            names!(x.D, [:Dn, :ch_id, :ph, :ccbm, :y])
+            rename!(x.D, [:Dn, :ch_id, :ph, :ccbm, :y])
         else
-            names!(x.D, [:Dn, :ch_id, :y])
+            rename!(x.D, [:Dn, :ch_id, :y])
         end
     end
     x.nrates  = asint(a[x.tt + 4])
@@ -120,7 +126,7 @@ function read_cfg(fn)
         x.endsamp[i] = asint(sa[2])
     end
     nrow = x.tt + max(x.nrates, 1)
-    x.npts = sum(x.endsamp)    
+    x.npts = sum(x.endsamp)
     try
         x.time        = DateTimeMicro(strip(a[nrow + 5]))
     catch
@@ -144,4 +150,4 @@ function read_cfg(fn)
         x.leapsec = asint(sa[2])
     end
     return x
-end    
+end

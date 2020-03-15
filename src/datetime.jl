@@ -1,17 +1,17 @@
 
-using Base.Dates
-import Base.Dates.value
-import Base.Dates.days
+using Dates
+import Dates.value
+import Dates.days
 
 # Define a date-time with microsecond accuracy.
 # Note that this doesn't include all features of a `DateTime`.
 # Includes code derived from Julia base/dates/*.
 
-immutable Microsecond <: Base.Dates.TimePeriod
+struct Microsecond <: Dates.TimePeriod
     value::Int64
 end
 
-Dates.slotparse(slot::Dates.Slot{Microsecond}, x, locale) = 
+Dates.slotparse(slot::Dates.Slot{Microsecond}, x, locale) =
     !ismatch(r"[^0-9\s]",x) ? slot.parser(Base.parse(Float64,"."*x)*1e6) : throw(SLOTERROR)
 # Dates.slotformat(slot::Slot{Microsecond},dt,locale) = rpad(string(microsecond(dt)/1000.0)[3:end], slot.width, "0")
 Dates.SLOT_RULE['z'] = Microsecond
@@ -83,12 +83,9 @@ end
 DateTimeMicro(dt::AbstractString,format::AbstractString;locale::AbstractString="english") = DateTimeMicro(dt,DateFormat(format,locale))
 DateTimeMicro(dt::AbstractString,df::DateFormat=DateFormat("m/d/y,H:M:S.z")) = DateTimeMicro(Dates.parse(dt,df)...)
 
-Base.convert(::Type{DateTimeMicro},dt::DateTime) = 
+Base.convert(::Type{DateTimeMicro},dt::DateTime) =
     DateTimeMicro(Dates.UTInstant(Microsecond(value(dt) * 1000)))
-Base.convert(::Type{DateTime},dt::DateTimeMicro) = 
+Base.convert(::Type{DateTime},dt::DateTimeMicro) =
     DateTime(Dates.UTInstant(Millisecond(div(value(dt), 1000))))
 Base.promote_rule(::Type{DateTime},x::Type{DateTimeMicro}) = DateTimeMicro
 Base.isless(x::DateTimeMicro,y::DateTimeMicro) = isless(value(x),value(y))
-
-
-

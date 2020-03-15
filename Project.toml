@@ -1,0 +1,11 @@
+name = "COMTRADE"
+uuid = "8f464e1e-25db-479f-b0a5-b7680379e03f"
+authors = ["Tom Short <tshort.rlists@gmail.com>"]
+version = "0.1.1"
+
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+
+
+[compat]
+julia = "1.2"
