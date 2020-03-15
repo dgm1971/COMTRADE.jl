@@ -1,5 +1,6 @@
-using COMTRADE
-using Base.Test
+include("../src/COMTRADE.jl")
+using .COMTRADE
+using Test
 
 z1 = read_comtrade("data/1991-ascii-sel")
 z2 = read_comtrade("data/1999-ascii-pq")
@@ -29,6 +30,4 @@ z3 = read_comtrade("data/1999-binary-hif-sel")
 @test z3.cfg.D[2, :ch_id] == "NTUNE_A"
 @test z3.cfg.triggertime > z1.cfg.time
 @test z3.dat[1, :IARMS] ≈ 0.0
-@test z3.dat[1, :EN] 
-
-
+@test z3.dat[1, :EN]
