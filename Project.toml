@@ -1,11 +1,12 @@
 name = "COMTRADE"
-uuid = "8f464e1e-25db-479f-b0a5-b7680379e03f"
+uuid = "39eb2054-9c37-49d8-bb65-10e6baadba6c"
 authors = ["Tom Short <tshort.rlists@gmail.com>"]
 version = "0.1.1"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+
 
 [compat]
 julia = "1.2"
