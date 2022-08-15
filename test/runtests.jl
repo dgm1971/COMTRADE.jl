@@ -1,7 +1,7 @@
 include("../src/COMTRADE.jl")
 using .COMTRADE
 using Test
-println(pwd())
+
 z1 = read_comtrade("./data/1991-ascii-sel")
 z2 = read_comtrade("./data/1999-ascii-pq")
 z3 = read_comtrade("./data/1999-binary-hif-sel")
