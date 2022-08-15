@@ -44,7 +44,7 @@ See also `COMTRADE.ComtradeCfg` for a description of the `cfg` field.
 function read_comtrade(basename)
     cfg = read_cfg("$basename.cfg")
     if cfg.ft == "ASCII"
-        d = CSV.read("$basename.dat", delim = ',', header = false)
+        d = CSV.read("$basename.dat", DataFrame,  delim = ',', header = false)
         #for i in 1:cfg.nA+2   # convert DataArray columns to Arrays
         #    d[i] = d[i]
         #end

@@ -107,11 +107,11 @@ function read_cfg(fn)
     x.tt = asint(sa[1])
     x.nA = asint(replace(sa[2], "A"=> ""))
     x.nD = asint(replace(sa[3], "D"=>""))
-    x.A = CSV.read(fn, delim = ',', header = false, skipto = 3,
+    x.A = CSV.read(fn, DataFrame,  delim = ',', header = false, skipto = 3,
                     limit = x.nA)
     rename!(x.A, [:An, :ch_id, :ph, :ccbm, :uu, :a, :b, :skew, :min, :max, :primary, :secondary, :PS][1:ncol(x.A)])
     if x.nD > 0
-        x.D = CSV.read(fn, delim = ',', header = false, skipto = 3 + x.nA,
+        x.D = CSV.read(fn, DataFrame, delim = ',', header = false, skipto = 3 + x.nA,
                         limit = x.nD)
         if x.rev_year > 1991
             rename!(x.D, [:Dn, :ch_id, :ph, :ccbm, :y])

@@ -1,12 +1,12 @@
 include("../src/COMTRADE.jl")
 using .COMTRADE
 using Test
+println(pwd())
+z1 = read_comtrade("./data/1991-ascii-sel")
+z2 = read_comtrade("./data/1999-ascii-pq")
+z3 = read_comtrade("./data/1999-binary-hif-sel")
 
-z1 = read_comtrade("data/1991-ascii-sel")
-z2 = read_comtrade("data/1999-ascii-pq")
-z3 = read_comtrade("data/1999-binary-hif-sel")
-
-@test z1.filename == "data/1991-ascii-sel"
+@test z1.filename == "./data/1991-ascii-sel"
 @test z1.cfg.rev_year == 1991
 @test z1.cfg.nA == 24
 @test z1.cfg.A[2, :ch_id] == "IB"
@@ -16,14 +16,14 @@ z3 = read_comtrade("data/1999-binary-hif-sel")
 @test z1.dat[1, S"VA(kV)"] ≈ -33.3998801
 @test !z1.dat[1, :TRP]
 
-@test z2.filename == "data/1999-ascii-pq"
+@test z2.filename == "./data/1999-ascii-pq"
 @test z2.cfg.rev_year == 1999
 @test z2.cfg.nA == 6
 @test z2.cfg.A[2, :ch_id] == "Ib"
 @test z2.cfg.triggertime > z1.cfg.time
 @test z2.dat[1, :Ia] ≈ 101.06138883816476
 
-@test z3.filename == "data/1999-binary-hif-sel"
+@test z3.filename == "./data/1999-binary-hif-sel"
 @test z3.cfg.rev_year == 1999
 @test z3.cfg.nA == 18
 @test z3.cfg.A[2, :ch_id] == "IBRMS"
