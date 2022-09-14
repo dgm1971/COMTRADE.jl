@@ -2,6 +2,7 @@
 using Dates
 import Dates.value
 import Dates.days
+using Printf
 
 # Define a date-time with microsecond accuracy.
 # Note that this doesn't include all features of a `DateTime`.
@@ -11,7 +12,7 @@ struct Microsecond <: Dates.TimePeriod
     value::Int64
 end
 
-Dates.slotparse(slot::Dates.Slot{Microsecond}, x, locale) =
+Dates.(slot::Dates.Slot{Microsecond}, x, locale) =
     !ismatch(r"[^0-9\s]",x) ? slot.parser(Base.parse(Float64,"."*x)*1e6) : throw(SLOTERROR)
 # Dates.slotformat(slot::Slot{Microsecond},dt,locale) = rpad(string(microsecond(dt)/1000.0)[3:end], slot.width, "0")
 Dates.SLOT_RULE['z'] = Microsecond
@@ -26,7 +27,7 @@ Dates.toms(c::Microsecond) = div(value(c), 1000)
 Dates.days(c::Microsecond) = div(value(c), 86_400_000_000)
 
 # DateTime is a millisecond precision UTInstant interpreted by ISOCalendar
-immutable DateTimeMicro <: TimeType
+struct DateTimeMicro <: TimeType
     instant::Dates.UTInstant{Microsecond}
     DateTimeMicro(instant::Dates.UTInstant{Microsecond}) = new(instant)
 end
